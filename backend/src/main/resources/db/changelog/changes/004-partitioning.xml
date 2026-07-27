@@ -33,6 +33,6 @@
         <rollback>
             <sql>SELECT 1;</sql>
         </rollback>
-    </changeSet>
+    </changeSet> 
 
 </databaseChangeLog>

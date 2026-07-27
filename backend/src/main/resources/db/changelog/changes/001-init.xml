@@ -18,12 +18,22 @@
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
 
     <changeSet id="001-init-tag" author="trainer">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="init_log"/>
+            </not>
+        </preConditions>
+
         <tagDatabase tag="v1.0.0-init"/>
+
         <createTable tableName="init_log">
         </createTable>
+
         <rollback>
             <dropTable tableName="init_log"/>
         </rollback>
+
     </changeSet>
 
 </databaseChangeLog>

@@ -18,9 +18,11 @@
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
 
     <changeSet id="005-mv-daily-recon-summary" author="trainer">
+
         <preConditions onFail="MARK_RAN">
             <dbms type="postgresql"/>
         </preConditions>
+
         <sql splitStatements="false"><![CDATA[
             CREATE MATERIALIZED VIEW mv_daily_recon_summary AS
             SELECT
@@ -36,9 +38,11 @@
             CREATE UNIQUE INDEX uq_mv_daily_recon_summary_trade_date
                 ON mv_daily_recon_summary (trade_date);
         ]]></sql>
+
         <rollback>
             <sql>DROP MATERIALIZED VIEW IF EXISTS mv_daily_recon_summary;</sql>
         </rollback>
+
     </changeSet>
 
 </databaseChangeLog>
