@@ -1,4 +1,7 @@
+
 package com.dbtraining.reconx.security;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,22 +63,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        // ====================================================================
-        // Day-1 permissive default — replace with TICKET-ADV073 + ADV074 rules.
-        // ====================================================================
-        // TODO(TICKET-ADV073 + ADV074): swap this permitAll() block for the
-        //   stateless JWT + role-based chain shown in the Javadoc above.
-        // ====================================================================
-
         return http
                 .csrf(csrf -> csrf.disable())
-                .headers(h -> h.frameOptions(f -> f.disable())) // allow /h2 in dev
+                .headers(h -> h.frameOptions(f -> f.disable()))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .build();
     }
 
-    // TODO(TICKET-ADV073): @Bean PasswordEncoder (BCrypt).
-    // TODO(TICKET-ADV073): register JwtAuthenticationFilter before
-    //                     UsernamePasswordAuthenticationFilter.
-    // TODO(TICKET-ADV074): add @EnableMethodSecurity and the RBAC matchers.
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }
