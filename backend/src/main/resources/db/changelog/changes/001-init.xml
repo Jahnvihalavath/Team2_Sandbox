@@ -2,13 +2,6 @@
 <!--
  ============================================================================
  TICKET-ADV012 / ADV013 / ADV014 — first changeset + rollback + preconditions
- WHAT:    Initial DB setup: ensure databasechangelog is the only Liquibase
-          artefact at first run. Demonstrates rollback tags and preconditions.
- HOW:     One <changeSet> per logical step. <rollback> defines the reverse
-          op (so `liquibase rollbackCount 1` actually works).
- WHY:     Without rollback definitions every changeset is one-way. Without
-          preconditions a re-run on a half-applied DB will fail loudly.
- OBSERVE: After boot, `SELECT * FROM databasechangelog` shows id=001-init.
  ============================================================================
 -->
 <databaseChangeLog
@@ -17,13 +10,30 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
 
-    <changeSet id="001-init-tag" author="trainer">
-        <tagDatabase tag="v1.0.0-init"/>
+
+    <changeSet id="001-init" author="trainer">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="init_log"/>
+            </not>
+        </preConditions>
+
         <createTable tableName="init_log">
         </createTable>
+
         <rollback>
             <dropTable tableName="init_log"/>
         </rollback>
+
     </changeSet>
+
+
+    <changeSet id="001-init-tag" author="trainer">
+
+        <tagDatabase tag="v1.0.0-init"/>
+
+    </changeSet>
+
 
 </databaseChangeLog>
