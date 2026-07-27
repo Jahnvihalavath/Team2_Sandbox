@@ -51,7 +51,7 @@ public final class DerivativeTrade implements TradeType {
     /** Simplified notional = strike * quantity in the trade currency. */
     @Override public Money notional() {
         // TODO(TICKET-ADV022): return new Money(strike * quantity, currency).
-        throw new UnsupportedOperationException("TICKET-ADV022");
+        return new Money(strike.multiply(quantity), currency);
     }
 
     public String underlying()       { return underlying; }
