@@ -6,15 +6,14 @@ import com.dbtraining.reconx.repository.entity.Trade;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
-/*
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-07-26T23:07:17-0700",
-    comments = "version: 1.6.2, compiler: Eclipse JDT (IDE) 3.33.0.v20230213-1046, environment: Java 17.0.6 (Eclipse Adoptium)"
+    date = "2026-07-27T22:53:34-0700",
+    comments = "version: 1.6.2, compiler: javac, environment: Java 25.0.3 (Oracle Corporation)"
 )
-*/
 @Component
 public class TradeMapperImpl implements TradeMapper {
 
