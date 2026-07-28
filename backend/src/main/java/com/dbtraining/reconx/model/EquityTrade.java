@@ -86,12 +86,12 @@ public final class EquityTrade implements TradeType {
         return tradeRef.hashCode();
     }
 
-    @Override
-    public String toString() {
-        // TODO(TICKET-ADV030): "EquityTrade[ref=..., symbol=..., qty=..., price=... CCY, side=...]"
-        //                     — must NOT leak counterparty PII.
-        throw new UnsupportedOperationException("TICKET-ADV030");
-    }
+    // @Override
+    // public String toString() {
+    //     // TODO(TICKET-ADV030): "EquityTrade[ref=..., symbol=..., qty=..., price=... CCY, side=...]"
+    //     //                     — must NOT leak counterparty PII.
+    //     throw new UnsupportedOperationException("TICKET-ADV030");
+    // }
 
     /** Fluent builder. Required fields validated in {@link #build()}. */
     public static final class Builder {
