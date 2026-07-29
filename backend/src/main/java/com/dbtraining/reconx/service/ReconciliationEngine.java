@@ -13,6 +13,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.dbtraining.reconx.model.EquityTrade;
+import com.dbtraining.reconx.model.FXTrade;
+import com.dbtraining.reconx.model.BondTrade;
+import com.dbtraining.reconx.model.DerivativeTrade;
+
 /**
  * ============================================================================
  * TICKET-ADV033 — ReconciliationEngine using Streams (parallel matching)
@@ -49,7 +54,33 @@ public class ReconciliationEngine {
         //     return internal.parallelStream()
         //         .map(in -> matchOne(in, externalByRef.get(in.tradeRef().value()), rule))
         //         .toList();
-        throw new UnsupportedOperationException("TICKET-ADV033");
+
+        if (internal == null || internal.isEmpty()) {
+            return List.of();
+        }
+
+        Map<String, TradeType> externalByRef =
+                (external == null ? List.<TradeType>of() : external)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                t -> t.tradeRef().value(),
+                                Function.identity(),
+                                (a, b) -> a
+                        ));
+
+        return internal.parallelStream()
+                .map(in ->
+                        matchOne(
+                                in,
+                                externalByRef.get(in.tradeRef().value()),
+                                rule
+                        )
+                )
+                .toList();
+    
+
+
+        // throw new UnsupportedOperationException("TICKET-ADV033");
     }
 
     /**
@@ -72,7 +103,46 @@ public class ReconciliationEngine {
         // TODO(TICKET-ADV033): if external is null return ReconResult.breakResult(ref, "MISSING_EXTERNAL", ...).
         //   Otherwise pull priceQty() for both sides, compare via rule.matches(...),
         //   return ReconResult.matched(ref) or breakResult(ref, "VALUE_MISMATCH", details).
-        throw new UnsupportedOperationException("TICKET-ADV033");
+        
+        String ref = internal.tradeRef().value();
+
+                if (external == null) {
+                    return ReconResult.breakResult(
+                            ref,
+                            "MISSING_EXTERNAL",
+                            "No external trade found for " + ref
+                    );
+                }
+        
+        
+                BigDecimal[] internalValues = priceQty(internal);
+                BigDecimal[] externalValues = priceQty(external);
+        
+        
+                if (rule.matches(
+                        internalValues[0],
+                        internalValues[1],
+                        externalValues[0],
+                        externalValues[1])) {
+        
+                    return ReconResult.matched(ref);
+                }
+        
+        
+                return ReconResult.breakResult(
+                        ref,
+                        "VALUE_MISMATCH",
+                        "internal=%s/%s external=%s/%s"
+                                .formatted(
+                                        internalValues[0],
+                                        internalValues[1],
+                                        externalValues[0],
+                                        externalValues[1]
+                                )
+                );
+        
+        
+        // throw new UnsupportedOperationException("TICKET-ADV033");
     }
 
     /** TICKET-ADV018 — exhaustive switch over the sealed hierarchy. */
@@ -81,6 +151,47 @@ public class ReconciliationEngine {
         //   (EquityTrade, FXTrade, BondTrade, DerivativeTrade) and return a
         //   BigDecimal[]{price, qty}. The compiler enforces exhaustiveness —
         //   omit a case and the build fails.
-        throw new UnsupportedOperationException("TICKET-ADV018");
+
+        
+        if (t instanceof EquityTrade e) {
+            return new BigDecimal[]{
+                    e.price(),
+                    e.quantity()
+            };
+        }
+
+        if (t instanceof FXTrade fx) {
+            return new BigDecimal[]{
+                    fx.fxRate(),
+                    fx.notionalCcy1()
+            };
+        }
+
+        if (t instanceof BondTrade b) {
+            return new BigDecimal[]{
+                    b.couponRate(),
+                    b.faceValue()
+            };
+        }
+
+        if (t instanceof DerivativeTrade d) {
+            return new BigDecimal[]{
+                    d.strike(),
+                    d.quantity()
+            };
+        }
+
+        throw new IllegalArgumentException(
+                "Unsupported TradeType: " + t.getClass()
+        );
+    
+
+        // throw new UnsupportedOperationException("TICKET-ADV018");
     }
 }
+
+
+
+
+
+
