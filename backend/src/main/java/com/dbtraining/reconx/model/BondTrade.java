@@ -61,6 +61,7 @@ public final class BondTrade implements TradeType {
     }
 
     @Override public int hashCode() {
+        
         return tradeRef.hashCode();
     }
 
