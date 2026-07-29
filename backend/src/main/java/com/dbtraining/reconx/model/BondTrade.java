@@ -9,10 +9,10 @@ import java.util.Objects;
  * ============================================================================
  * Represnts a bond trade processed by the reconciliation system.
  *
- *<p> A bond trade stores the information reuired to identify,
- *value and reconcile a fixed-income security, including its
- *face value,coupon rate,maturity ddate,currency and trade
- *details.</p>
+ * <p> A bond trade stores the information reuired to identify,
+ * value and reconcile a fixed-income security, including its
+ * face value,coupon rate,maturity ddate,currency and trade
+ * details.</p>
  * ============================================================================
  */
  
