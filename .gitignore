@@ -1,0 +1,6 @@
+*.class
+target/
+backend/target/
+.settings/
+.classpath
+.project 
