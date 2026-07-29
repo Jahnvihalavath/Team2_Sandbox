@@ -56,7 +56,7 @@ public final class BondTrade implements TradeType {
             return true;
         }
 
-        if (!(o instanceof EquityTrade other)) {
+        if (!(o instanceof BondTrade other)) {
             return false;
         }
 
@@ -70,7 +70,7 @@ public final class BondTrade implements TradeType {
 
     @Override
     public String toString() {
-        return "EquityTrade[ref=%s, symbol=%s, qty=%s, price=%s %s, side=%s]"
+        return "BondTrade[ref=%s, symbol=%s, qty=%s, price=%s %s, side=%s]"
         .formatted(
                 tradeRef,
                 instrumentSymbol,

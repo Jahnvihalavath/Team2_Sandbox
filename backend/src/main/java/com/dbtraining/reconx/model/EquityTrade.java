@@ -37,8 +37,6 @@ public final class EquityTrade implements TradeType {
     @Override public Money notional() {
         // TODO(TICKET-ADV019): return new Money(quantity * price, currency).
         return new Money(quantity.multiply(price), currency);
-
-        return new Money(quantity.multiply(price), currency);
         // throw new UnsupportedOperationException("TICKET-ADV019");
 
     }
@@ -72,9 +70,6 @@ public final class EquityTrade implements TradeType {
     @Override
     public String toString() {
         return "EquityTrade[ref=%s, symbol=%s, qty=%s, price=%s %s, side=%s]"
-        // TODO(TICKET-ADV030): "EquityTrade[ref=..., symbol=..., qty=..., price=... CCY, side=...]"
-        //                     — must NOT leak counterparty PII.
-        return "EquityTrade[ref=%s, symbol=%s, qty=%s, price=%s %s, side=%s]"
         .formatted(
                 tradeRef,
                 instrumentSymbol,
@@ -107,25 +102,25 @@ public final class EquityTrade implements TradeType {
         public Builder counterpartyId(long v)         { this.counterpartyId = v;  return this; }
 
 
-        public EquityTrade build() {
+        // public EquityTrade build() {
 
-            Objects.requireNonNull(tradeRef, "tradeRef is required");
-            Objects.requireNonNull(instrumentSymbol, "instrumentSymbol is required");
-            Objects.requireNonNull(quantity, "quantity is required");
-            Objects.requireNonNull(price, "price is required");
-            Objects.requireNonNull(currency, "currency is required");
-            Objects.requireNonNull(side, "side is required");
-            Objects.requireNonNull(tradeDate, "tradeDate is required");
+        //     Objects.requireNonNull(tradeRef, "tradeRef is required");
+        //     Objects.requireNonNull(instrumentSymbol, "instrumentSymbol is required");
+        //     Objects.requireNonNull(quantity, "quantity is required");
+        //     Objects.requireNonNull(price, "price is required");
+        //     Objects.requireNonNull(currency, "currency is required");
+        //     Objects.requireNonNull(side, "side is required");
+        //     Objects.requireNonNull(tradeDate, "tradeDate is required");
         
-            if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalStateException("quantity must be greater than zero");
-            }
+        //     if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
+        //         throw new IllegalStateException("quantity must be greater than zero");
+        //     }
         
-            if (price.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalStateException("price must be greater than zero");
-            }
+        //     if (price.compareTo(BigDecimal.ZERO) <= 0) {
+        //         throw new IllegalStateException("price must be greater than zero");
+        //     }
         
-            return new EquityTrade(this);
-        }
+        //     return new EquityTrade(this);
+        // }
     }
 }
