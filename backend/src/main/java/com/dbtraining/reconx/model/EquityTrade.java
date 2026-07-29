@@ -48,7 +48,6 @@ public final class EquityTrade implements TradeType {
     public Side side()               { return side; }
     public long counterpartyId()     { return counterpartyId; }
 
-    /** equals: two EquityTrades are equal iff their tradeRef is equal. */
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -70,7 +69,7 @@ public final class EquityTrade implements TradeType {
     @Override
     public String toString() {
         return "EquityTrade[ref=%s, symbol=%s, qty=%s, price=%s %s, side=%s]"
-        
+
         .formatted(
                 tradeRef,
                 instrumentSymbol,
@@ -81,7 +80,6 @@ public final class EquityTrade implements TradeType {
         );
     }
 
-    /** Fluent builder. Required fields validated in {@link #build()}. */
     public static final class Builder {
         private TradeRef tradeRef;
         private String instrumentSymbol;

@@ -29,7 +29,9 @@ public final class BondTrade implements TradeType {
         this.counterpartyId = b.counterpartyId;
     }
 
-    public static Builder builder() { return new Builder(); }
+    public static Builder builder() { 
+        return new Builder(); 
+    }
 
     @Override public TradeRef tradeRef()     { return tradeRef; }
     @Override public LocalDate tradeDate()   { return tradeDate; }

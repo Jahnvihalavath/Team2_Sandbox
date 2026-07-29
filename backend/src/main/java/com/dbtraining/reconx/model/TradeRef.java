@@ -11,8 +11,7 @@ public record TradeRef(String value) {
     public TradeRef {
         Objects.requireNonNull(value, "tradeRef value");
         if (!PATTERN.matcher(value).matches()) {
-            throw new IllegalArgumentException(
-                    "Invalid tradeRef format '%s' — expected AAA-YYYYMMDD-NNNN".formatted(value));
+            throw new IllegalArgumentException("Invalid tradeRef format '%s' — expected AAA-YYYYMMDD-NNNN".formatted(value));
         }
     }
 
