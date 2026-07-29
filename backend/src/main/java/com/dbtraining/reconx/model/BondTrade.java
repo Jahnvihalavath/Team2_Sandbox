@@ -48,7 +48,8 @@ public final class BondTrade implements TradeType {
     /** Notional = faceValue in the bond's currency. */
     @Override public Money notional() {
         // TODO(TICKET-ADV021): return new Money(faceValue, currency).
-        throw new UnsupportedOperationException("TICKET-ADV021");
+        //throw new UnsupportedOperationException("TICKET-ADV021");
+        return new Money(quantity.multiply(price), currency);
     }
 
     public String isin()              { return isin; }
@@ -59,18 +60,35 @@ public final class BondTrade implements TradeType {
     public Side side()                { return side; }
     public long counterpartyId()      { return counterpartyId; }
 
-    @Override public boolean equals(Object o) {
-        // TODO(TICKET-ADV028): pattern-match on BondTrade and compare tradeRef.
-        throw new UnsupportedOperationException("TICKET-ADV028");
-    }
-    @Override public int hashCode() {
-        // TODO(TICKET-ADV028): hash from tradeRef.
-        throw new UnsupportedOperationException("TICKET-ADV028");
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof EquityTrade other)) {
+            return false;
+        }
+
+        return tradeRef.equals(other.tradeRef);
     }
 
-    @Override public String toString() {
-        // TODO(TICKET-ADV030): "BondTrade[ref=..., isin=..., face=... CCY, coupon=..., maturity=..., side=...]"
-        throw new UnsupportedOperationException("TICKET-ADV030");
+    @Override public int hashCode() {
+        // TODO(TICKET-ADV028): hash from tradeRef so it pairs with equals().
+        return tradeRef.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "EquityTrade[ref=%s, symbol=%s, qty=%s, price=%s %s, side=%s]"
+        .formatted(
+                tradeRef,
+                instrumentSymbol,
+                quantity,
+                price,
+                currency,
+                side
+        );
     }
 
     public static final class Builder {
