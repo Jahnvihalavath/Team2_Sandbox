@@ -5,16 +5,6 @@ import java.time.LocalDate;
 import java.util.Currency;
 import java.util.Objects;
 
-/**
- * ============================================================================
- * TICKET-ADV021 — BondTrade with Builder pattern
- *
- * WHAT:    Fixed-income trade — couponRate, maturityDate, faceValue, isin.
- * HOW:     Same builder pattern. notional() = faceValue (in the bond's ccy).
- * WHY:     Bonds need couponRate/maturity for downstream cashflow modelling.
- *          Modelling them on the trade is the simplest path for the demo.
- * ============================================================================
- */
 public final class BondTrade implements TradeType {
 
     private final TradeRef tradeRef;
@@ -110,12 +100,5 @@ public final class BondTrade implements TradeType {
         public Builder tradeDate(LocalDate v)      { this.tradeDate = v; return this; }
         public Builder counterpartyId(long v)      { this.counterpartyId = v; return this; }
 
-        public BondTrade build() {
-            // TODO(TICKET-ADV021):
-            //   - Objects.requireNonNull each required field.
-            //   - maturityDate must not be before tradeDate (IllegalStateException otherwise).
-            //   - return new BondTrade(this).
-            throw new UnsupportedOperationException("TICKET-ADV021");
-        }
     }
 }

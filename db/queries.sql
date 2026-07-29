@@ -1,54 +1,87 @@
 -- ============================================================================
 -- TICKET-ADV010 — VWAP per instrument per day (window function)
 -- ============================================================================
-SELECT DISTINCT
-    t.instrument_id,
+SELECT
+    t.trade_ref,
     t.trade_date,
-    SUM(t.price * t.quantity) OVER (PARTITION BY t.instrument_id, t.trade_date)
-        / NULLIF(SUM(t.quantity) OVER (PARTITION BY t.instrument_id, t.trade_date), 0)
-            AS vwap
+    i.symbol,
+    t.quantity,
+    t.price,
+    t.quantity * t.price AS notional,
+
+    SUM(t.price * t.quantity)
+        OVER (PARTITION BY t.instrument_id, t.trade_date)
+    /
+    NULLIF(
+        SUM(t.quantity)
+            OVER (PARTITION BY t.instrument_id, t.trade_date),
+        0
+    ) AS vwap
+
 FROM trades t
+JOIN instruments i
+    ON i.id = t.instrument_id
+
 WHERE t.deleted_at IS NULL
   AND t.asset_class = 'EQUITY'
-ORDER BY t.trade_date DESC, t.instrument_id;
+
+ORDER BY
+    t.trade_date DESC,
+    i.symbol,
+    t.trade_ref;
 
 
 -- ============================================================================
 -- TICKET-ADV011 — Recursive CTE: trade lifecycle (execution -> settlement
 --                -> recon_break -> resolution)
 -- ============================================================================
+-- ============================================================================
+-- TICKET-ADV011 — Recursive CTE: trade lifecycle rollup
+-- ============================================================================
+
 WITH RECURSIVE trade_lifecycle AS (
-    -- anchor: every trade in its execution state
+
+    -- Base case: every trade starts in EXECUTED stage
     SELECT
-        t.id           AS trade_id,
+        t.id AS trade_id,
         t.trade_ref,
-        1              AS step,
-        'EXECUTED'     AS state,
-        t.created_at   AS at_ts,
-        NULL::text     AS detail
+        1 AS stage,
+        'EXECUTED' AS stage_name,
+        t.created_at AS event_at,
+        NULL::text AS event_status
     FROM trades t
     WHERE t.deleted_at IS NULL
 
     UNION ALL
 
-    -- recursive: each subsequent state derived from the previous step
+    -- Recursive step: advance through lifecycle stages
     SELECT
         tl.trade_id,
         tl.trade_ref,
-        tl.step + 1,
-        CASE tl.step
+        tl.stage + 1,
+        CASE tl.stage
             WHEN 1 THEN 'CONFIRMED'
             WHEN 2 THEN 'SETTLED'
             WHEN 3 THEN 'RECONCILED'
-        END                                          AS state,
-        s.settlement_date::timestamp                  AS at_ts,
-        s.status                                      AS detail
+            WHEN 4 THEN 'RESOLVED'
+        END AS stage_name,
+        s.settlement_date::timestamp AS event_at,
+        s.status AS event_status
     FROM trade_lifecycle tl
-    JOIN settlements s ON s.trade_id = tl.trade_id
-    WHERE tl.step < 4
+    JOIN settlements s
+        ON s.trade_id = tl.trade_id
+    WHERE tl.stage < 5
 )
-SELECT * FROM trade_lifecycle
-ORDER BY trade_id, step;
+
+SELECT
+    trade_id,
+    trade_ref,
+    stage,
+    stage_name,
+    event_at,
+    event_status
+FROM trade_lifecycle
+ORDER BY trade_id, stage;
 
 
 -- ============================================================================

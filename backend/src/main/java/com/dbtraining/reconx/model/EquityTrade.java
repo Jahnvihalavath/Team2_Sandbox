@@ -37,6 +37,10 @@ public final class EquityTrade implements TradeType {
     @Override public Money notional() {
         // TODO(TICKET-ADV019): return new Money(quantity * price, currency).
         return new Money(quantity.multiply(price), currency);
+
+        return new Money(quantity.multiply(price), currency);
+        // throw new UnsupportedOperationException("TICKET-ADV019");
+
     }
 
     public String instrumentSymbol() { return instrumentSymbol; }
@@ -60,13 +64,16 @@ public final class EquityTrade implements TradeType {
         return tradeRef.equals(other.tradeRef);
     }
 
-    @Override public int hashCode() {
-        // TODO(TICKET-ADV028): hash from tradeRef so it pairs with equals().
+    @Override
+    public int hashCode() {
         return tradeRef.hashCode();
     }
 
     @Override
     public String toString() {
+        return "EquityTrade[ref=%s, symbol=%s, qty=%s, price=%s %s, side=%s]"
+        // TODO(TICKET-ADV030): "EquityTrade[ref=..., symbol=..., qty=..., price=... CCY, side=...]"
+        //                     — must NOT leak counterparty PII.
         return "EquityTrade[ref=%s, symbol=%s, qty=%s, price=%s %s, side=%s]"
         .formatted(
                 tradeRef,
@@ -99,5 +106,26 @@ public final class EquityTrade implements TradeType {
         public Builder tradeDate(LocalDate v)         { this.tradeDate = v;       return this; }
         public Builder counterpartyId(long v)         { this.counterpartyId = v;  return this; }
 
+
+        public EquityTrade build() {
+
+            Objects.requireNonNull(tradeRef, "tradeRef is required");
+            Objects.requireNonNull(instrumentSymbol, "instrumentSymbol is required");
+            Objects.requireNonNull(quantity, "quantity is required");
+            Objects.requireNonNull(price, "price is required");
+            Objects.requireNonNull(currency, "currency is required");
+            Objects.requireNonNull(side, "side is required");
+            Objects.requireNonNull(tradeDate, "tradeDate is required");
+        
+            if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalStateException("quantity must be greater than zero");
+            }
+        
+            if (price.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalStateException("price must be greater than zero");
+            }
+        
+            return new EquityTrade(this);
+        }
     }
 }
