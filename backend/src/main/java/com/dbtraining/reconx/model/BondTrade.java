@@ -5,17 +5,6 @@ import java.time.LocalDate;
 import java.util.Currency;
 import java.util.Objects;
 
-/**
- * ============================================================================
- * Represnts a bond trade processed by the reconciliation system.
- *
- * <p> A bond trade stores the information reuired to identify,
- * value and reconcile a fixed-income security, including its
- * face value,coupon rate,maturity ddate,currency and trade
- * details.</p>
- * ============================================================================
- */
- 
 public final class BondTrade implements TradeType {
 
     private final TradeRef tradeRef;
@@ -28,18 +17,6 @@ public final class BondTrade implements TradeType {
     private final LocalDate tradeDate;
     private final long counterpartyId;
 
-    /** 
-    *Creates a new bond trade.
-    *
-    *@param tradeRef unique trade identifier
-    *@param isin international securities identifier
-    *@param faceValue bond face value
-    *@param couponRate annual coupon rate
-    *@param maturityDate maturity date of the bond
-    *@param currency settlement currency
-    *@param side buy or sell side
-    *@param tradeDate execution date
-    */
     private BondTrade(Builder b) {
         this.tradeRef       = b.tradeRef;
         this.isin           = b.isin;
@@ -61,7 +38,8 @@ public final class BondTrade implements TradeType {
     /** Notional = faceValue in the bond's currency. */
     @Override public Money notional() {
         // TODO(TICKET-ADV021): return new Money(faceValue, currency).
-        return new Money(faceValue, currency);
+        //throw new UnsupportedOperationException("TICKET-ADV021");
+        return new Money(quantity.multiply(price), currency);
     }
 
     public String isin()              { return isin; }
@@ -85,21 +63,20 @@ public final class BondTrade implements TradeType {
         return tradeRef.equals(other.tradeRef);
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
+        // TODO(TICKET-ADV028): hash from tradeRef so it pairs with equals().
         return tradeRef.hashCode();
     }
 
-    @Override public String toString() {
-        // TODO(TICKET-ADV030): "BondTrade[ref=..., isin=..., face=... CCY, coupon=..., maturity=..., side=...]"
-         return "BondTrade[ref=%s, isin=%s, face=%s %s, coupon=%s, maturity=%s, side=%s]"
+    @Override
+    public String toString() {
+        return "BondTrade[ref=%s, symbol=%s, qty=%s, price=%s %s, side=%s]"
         .formatted(
                 tradeRef,
-                isin,
-                faceValue,
+                instrumentSymbol,
+                quantity,
+                price,
                 currency,
-                couponRate,
-                maturityDate,
                 side
         );
     }
@@ -123,27 +100,5 @@ public final class BondTrade implements TradeType {
         public Builder tradeDate(LocalDate v)      { this.tradeDate = v; return this; }
         public Builder counterpartyId(long v)      { this.counterpartyId = v; return this; }
 
-        public BondTrade build() {
-            // TODO(TICKET-ADV021):
-            //   - Objects.requireNonNull each required field.
-            //   - maturityDate must not be before tradeDate (IllegalStateException otherwise).
-            //   - return new BondTrade(this).
-            Objects.requireNonNull(tradeRef, "tradeRef");
-Objects.requireNonNull(isin, "isin");
-Objects.requireNonNull(faceValue, "faceValue");
-Objects.requireNonNull(couponRate, "couponRate");
-Objects.requireNonNull(maturityDate, "maturityDate");
-Objects.requireNonNull(currency, "currency");
-Objects.requireNonNull(side, "side");
-Objects.requireNonNull(tradeDate, "tradeDate");
-
-if (maturityDate.isBefore(tradeDate)) {
-    throw new IllegalStateException(
-            "maturityDate cannot be before tradeDate"
-    );
-}
-
-return new BondTrade(this);
-        }
     }
 }
