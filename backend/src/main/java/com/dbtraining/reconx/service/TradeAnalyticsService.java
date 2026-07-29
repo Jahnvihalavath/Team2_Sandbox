@@ -3,6 +3,7 @@ package com.dbtraining.reconx.service;
 import com.dbtraining.reconx.model.EquityTrade;
 import com.dbtraining.reconx.model.TradeType;
 import org.springframework.stereotype.Service;
+import com.dbtraining.reconx.model.Side;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -46,12 +47,26 @@ public class TradeAnalyticsService {
         // TODO(TICKET-ADV036): groupingBy(EquityTrade::instrumentSymbol,
         //   mapping(this::pnl, reducing(BigDecimal.ZERO, BigDecimal::add))).
         //   Side.SELL contributes positively; Side.BUY contributes negatively.
-        throw new UnsupportedOperationException("TICKET-ADV036");
+        return equityTrades.stream()
+        .collect(Collectors.groupingBy(
+                EquityTrade::instrumentSymbol,
+                Collectors.mapping(
+                        this::pnl,
+                        Collectors.reducing(
+                                BigDecimal.ZERO,
+                                BigDecimal::add
+                        )
+                )
+        ));
     }
 
     private BigDecimal pnl(EquityTrade t) {
         // TODO(TICKET-ADV036): BigDecimal abs = price * qty; SELL -> abs, BUY -> abs.negate().
-        throw new UnsupportedOperationException("TICKET-ADV036");
+        BigDecimal abs = t.price().multiply(t.quantity());
+
+return t.side() == Side.SELL
+        ? abs
+        : abs.negate();
     }
 
     private long counterpartyIdOf(TradeType t) {
