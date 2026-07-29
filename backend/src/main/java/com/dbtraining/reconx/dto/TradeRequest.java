@@ -16,30 +16,37 @@ import java.time.LocalDate;
  * ============================================================================
  */
 public record TradeRequest(
-        @NotNull
-        @Pattern(regexp = "^[A-Z]{3}-\\d{8}-\\d{4}$",
-                 message = "tradeRef must match AAA-YYYYMMDD-NNNN")
+        @NotBlank(message = "tradeRef is required")
+        @Pattern(
+                regexp = "^[A-Z]{3}-\\d{8}-\\d{4}$",
+                message = "tradeRef must match AAA-YYYYMMDD-NNNN"
+        )
         String tradeRef,
 
-        @NotNull
+        @NotNull(message = "instrumentId is required")
         Long instrumentId,
 
-        @NotNull
+        @NotNull(message = "counterpartyId is required")
         Long counterpartyId,
 
-        @NotBlank
+        @NotBlank(message = "assetClass is required")
         String assetClass,
 
-        @NotBlank
-        @Pattern(regexp = "^(BUY|SELL)$")
+        @NotBlank(message = "side is required")
+        @Pattern(
+                regexp = "^(BUY|SELL)$",
+                message = "side must be BUY or SELL"
+        )
         String side,
 
-        @NotNull @Positive
+        @NotNull(message = "quantity is required")
+        @Positive(message = "quantity must be positive")
         BigDecimal quantity,
 
-        @NotNull @PositiveOrZero
+        @NotNull(message = "price is required")
+        @PositiveOrZero(message = "price must be zero or positive")
         BigDecimal price,
 
-        @NotNull
+        @NotNull(message = "tradeDate is required")
         LocalDate tradeDate
 ) {}
