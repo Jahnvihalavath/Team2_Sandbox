@@ -37,8 +37,6 @@ public final class BondTrade implements TradeType {
 
     /** Notional = faceValue in the bond's currency. */
     @Override public Money notional() {
-        // TODO(TICKET-ADV021): return new Money(faceValue, currency).
-        //throw new UnsupportedOperationException("TICKET-ADV021");
         return new Money(quantity.multiply(price), currency);
     }
 
@@ -59,10 +57,8 @@ public final class BondTrade implements TradeType {
         if (!(o instanceof BondTrade other)) {
             return false;
         }
-
         return tradeRef.equals(other.tradeRef);
     }
-
     @Override public int hashCode() {
         // TODO(TICKET-ADV028): hash from tradeRef so it pairs with equals().
         return tradeRef.hashCode();
@@ -76,8 +72,8 @@ public final class BondTrade implements TradeType {
                 instrumentSymbol,
                 quantity,
                 price,
-                currency,
-                side
+                currency;
+                side;
         );
     }
 

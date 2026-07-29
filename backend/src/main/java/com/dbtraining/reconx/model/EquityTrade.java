@@ -70,6 +70,7 @@ public final class EquityTrade implements TradeType {
     @Override
     public String toString() {
         return "EquityTrade[ref=%s, symbol=%s, qty=%s, price=%s %s, side=%s]"
+        
         .formatted(
                 tradeRef,
                 instrumentSymbol,
