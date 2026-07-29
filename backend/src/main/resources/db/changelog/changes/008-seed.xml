@@ -18,6 +18,13 @@
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
 
     <changeSet id="008-seed-counterparties" author="trainer">
+
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM counterparties;
+            </sqlCheck>
+        </preConditions>
+
         <loadData file="data/counterparties.csv" tableName="counterparties"
                   separator="," relativeToChangelogFile="true">
             <column name="id" type="NUMERIC"/>
@@ -25,12 +32,22 @@
             <column name="lei_code" type="STRING"/>
             <column name="region" type="STRING"/>
         </loadData>
+
         <rollback>
             <sql>DELETE FROM counterparties;</sql>
         </rollback>
+
     </changeSet>
 
+
     <changeSet id="008-seed-instruments" author="trainer">
+
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM instruments;
+            </sqlCheck>
+        </preConditions>
+
         <loadData file="data/instruments.csv" tableName="instruments"
                   separator="," relativeToChangelogFile="true">
             <column name="id" type="NUMERIC"/>
@@ -40,38 +57,54 @@
             <column name="currency" type="STRING"/>
             <column name="isin" type="STRING"/>
         </loadData>
+
         <rollback>
             <sql>DELETE FROM instruments;</sql>
         </rollback>
+
     </changeSet>
 
+
     <changeSet id="008-seed-users" author="trainer">
+
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM users;
+            </sqlCheck>
+        </preConditions>
+
         <!-- Real BCrypt hashes (cost=10) for admin123 / trader123 / viewer123 / recon123.
              Generated via: htpasswd -bnBC 10 "" <pw> | tr -d ':\n'
              Spring Security's BCryptPasswordEncoder accepts both $2a$ and $2y$ prefixes. -->
+
         <insert tableName="users">
             <column name="email" value="admin@db.com"/>
             <column name="password_hash" value="$2y$10$L9iP3BfsBS2LbVJRfc86TuWnJvP.AohjX3PNLwdtjlZfyB7YSp87C"/>
             <column name="role" value="ADMIN"/>
         </insert>
+
         <insert tableName="users">
             <column name="email" value="trader@db.com"/>
             <column name="password_hash" value="$2y$10$LIpkayi0QDWyVguPtEQbkOATM7PTnMKFDNq47K92TUx2LHTBFQf1i"/>
             <column name="role" value="TRADER"/>
         </insert>
+
         <insert tableName="users">
             <column name="email" value="viewer@db.com"/>
             <column name="password_hash" value="$2y$10$gC8J5Tzr15p4V6BgbbEFGOEb4VWM4YUOAdKEeyFlXtEvYolYblCVC"/>
             <column name="role" value="VIEWER"/>
         </insert>
+
         <insert tableName="users">
             <column name="email" value="recon@db.com"/>
             <column name="password_hash" value="$2y$10$UVYhlvPX38zSdPhY6bz4ee453bh6gXp9guhAfV5IU2SjcWPm0eWKq"/>
             <column name="role" value="RECON_ANALYST"/>
         </insert>
+
         <rollback>
             <sql>DELETE FROM users;</sql>
         </rollback>
+
     </changeSet>
 
 </databaseChangeLog>

@@ -2,15 +2,18 @@
 <!--
  ============================================================================
  TICKET-ADV007 — Monthly partitioning of trades on Postgres
- WHAT:    Convert trades into a range-partitioned parent on trade_date and
-          create partitions for the current rolling 12 months.
- HOW:     Postgres-only via raw SQL. The trainer guide for Day 1 documents
-          the "rename, recreate as partitioned, copy data" pattern that
-          students must run if production data already exists. In this clean
-          starter we recreate trades directly since there's nothing to copy.
- WHY:     500-million-row trades table would kill EXPLAIN; monthly partitions
-          give predictable prune-by-date plans.
- OBSERVE: \d+ trades shows "Partitioned table" + 12 child partitions.
+
+ WHAT:
+ Convert trades into a RANGE-partitioned table on trade_date and create
+ monthly partitions for April–July 2026 plus a DEFAULT partition.
+
+ WHY:
+ Partition pruning ensures reconciliation queries only scan the required
+ month instead of the entire trades table.
+
+ OBSERVE:
+ \d+ trades shows "Partitioned table" with monthly child partitions and
+ a DEFAULT partition.
  ============================================================================
 -->
 <databaseChangeLog
@@ -19,20 +22,95 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                             http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
 
-    <!-- Demonstration only: the partitioning conversion is destructive and is
-         taught in the trainer guide Day-1 Sprint 0B. In this starter we
-         create a single partition for the rolling-current-month so the
-         seed data has somewhere to land. -->
-    <changeSet id="004-partition-current-month" author="trainer">
+    <changeSet id="004-partition-trades" author="trainer">
+
         <preConditions onFail="MARK_RAN">
             <dbms type="postgresql"/>
         </preConditions>
-        <comment>Placeholder: students rebuild this in ADV007. Trainer copy
-                 ships a no-op so dev/uat boot cleanly.</comment>
-        <sql>SELECT 1;</sql>
+
+        <comment>
+            Convert trades into a PostgreSQL RANGE partitioned table.
+        </comment>
+
+        <sql>
+
+            -- Rename existing table
+            ALTER TABLE trades RENAME TO trades_legacy;
+
+            -- Create partitioned parent table
+            CREATE TABLE trades (
+                id BIGSERIAL,
+                trade_ref VARCHAR(30) NOT NULL,
+                instrument_id BIGINT NOT NULL REFERENCES instruments(id),
+                counterparty_id BIGINT NOT NULL REFERENCES counterparties(id),
+                asset_class VARCHAR(20) NOT NULL,
+                side VARCHAR(4) NOT NULL,
+                quantity NUMERIC(18,4) NOT NULL,
+                price NUMERIC(18,4) NOT NULL,
+                trade_date DATE NOT NULL,
+                status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+                deleted_at TIMESTAMP,
+                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                modified_at TIMESTAMP,
+
+                PRIMARY KEY (id, trade_date)
+            )
+            PARTITION BY RANGE (trade_date);
+
+            -- Parent indexes
+            CREATE INDEX idx_trades_status
+                ON trades(status);
+
+            CREATE INDEX idx_trades_instrument
+                ON trades(instrument_id);
+
+            CREATE INDEX idx_trades_counterparty
+                ON trades(counterparty_id);
+
+            -- Monthly partitions
+
+            CREATE TABLE trades_y2026m04
+                PARTITION OF trades
+                FOR VALUES FROM ('2026-04-01') TO ('2026-05-01');
+
+            CREATE TABLE trades_y2026m05
+                PARTITION OF trades
+                FOR VALUES FROM ('2026-05-01') TO ('2026-06-01');
+
+            CREATE TABLE trades_y2026m06
+                PARTITION OF trades
+                FOR VALUES FROM ('2026-06-01') TO ('2026-07-01');
+
+            CREATE TABLE trades_y2026m07
+                PARTITION OF trades
+                FOR VALUES FROM ('2026-07-01') TO ('2026-08-01');
+
+            -- Catch-all partition
+
+            CREATE TABLE trades_default
+                PARTITION OF trades DEFAULT;
+
+            -- Copy existing data
+
+            INSERT INTO trades
+            SELECT *
+            FROM trades_legacy;
+
+        </sql>
+
         <rollback>
-            <sql>SELECT 1;</sql>
+
+            <sql>
+
+                DROP TABLE IF EXISTS trades CASCADE;
+
+                ALTER TABLE trades_legacy
+                RENAME TO trades;
+
+            </sql>
+
         </rollback>
+
     </changeSet>
 
 </databaseChangeLog>
