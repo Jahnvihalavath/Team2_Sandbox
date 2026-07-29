@@ -35,7 +35,6 @@ public final class BondTrade implements TradeType {
     @Override public LocalDate tradeDate()   { return tradeDate; }
     @Override public AssetClass assetClass() { return AssetClass.BOND; }
 
-    /** Notional = faceValue in the bond's currency. */
     @Override public Money notional() {
         return new Money(quantity.multiply(price), currency);
     }
@@ -63,7 +62,6 @@ public final class BondTrade implements TradeType {
         // TODO(TICKET-ADV028): hash from tradeRef so it pairs with equals().
         return tradeRef.hashCode();
     }
-
     @Override
     public String toString() {
         return "BondTrade[ref=%s, symbol=%s, qty=%s, price=%s %s, side=%s]"
@@ -72,8 +70,8 @@ public final class BondTrade implements TradeType {
                 instrumentSymbol,
                 quantity,
                 price,
-                currency;
-                side;
+                currency,
+                side,
         );
     }
 
