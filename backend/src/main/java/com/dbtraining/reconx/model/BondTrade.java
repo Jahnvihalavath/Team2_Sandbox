@@ -29,15 +29,16 @@ public final class BondTrade implements TradeType {
         this.counterpartyId = b.counterpartyId;
     }
 
-    public static Builder builder() { 
-        return new Builder(); 
-    }
+    public static Builder builder() { return new Builder(); }
 
     @Override public TradeRef tradeRef()     { return tradeRef; }
     @Override public LocalDate tradeDate()   { return tradeDate; }
     @Override public AssetClass assetClass() { return AssetClass.BOND; }
 
+    /** Notional = faceValue in the bond's currency. */
     @Override public Money notional() {
+        // TODO(TICKET-ADV021): return new Money(faceValue, currency).
+        //throw new UnsupportedOperationException("TICKET-ADV021");
         return new Money(quantity.multiply(price), currency);
     }
 
@@ -58,12 +59,12 @@ public final class BondTrade implements TradeType {
         if (!(o instanceof BondTrade other)) {
             return false;
         }
-        
+
         return tradeRef.equals(other.tradeRef);
     }
 
     @Override public int hashCode() {
-        
+        // TODO(TICKET-ADV028): hash from tradeRef so it pairs with equals().
         return tradeRef.hashCode();
     }
 
@@ -76,7 +77,7 @@ public final class BondTrade implements TradeType {
                 quantity,
                 price,
                 currency,
-                side,
+                side
         );
     }
 
