@@ -3,6 +3,7 @@ package com.dbtraining.reconx.model;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+
 public record TradeRef(String value) {
 
     private static final Pattern PATTERN = Pattern.compile("^[A-Z]{3}-\\d{8}-\\d{4}$");
