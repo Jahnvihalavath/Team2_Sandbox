@@ -5,6 +5,24 @@ import java.time.LocalDate;
 import java.util.Currency;
 import java.util.Objects;
 
+/**
+ * ============================================================================
+ * TICKET-ADV019 — EquityTrade with Builder pattern
+ *
+ * WHAT:    Concrete TradeType for equity (cash share) trades.
+ * HOW:     Final class, all fields final, no setters. Construction is via the
+ *          nested {@link Builder} which validates in {@link Builder#build()}.
+ * WHY:     Eight required fields on a single constructor is unreadable at
+ *          the call site. Builder gives named arguments, makes the validity
+ *          check a single chokepoint, and the object stays immutable.
+ * OBSERVE: Calling build() with a missing required field throws
+ *          IllegalStateException — verified by EquityTradeTest.
+ * HINT:    Same shape applied to FXTrade/BondTrade/DerivativeTrade.
+ * ============================================================================
+ *
+ * TICKET-ADV028 — equals/hashCode from tradeRef (Object methods on a regular class)
+ * TICKET-ADV030 — toString() omits PII, prints reference/symbol/qty/price/side
+ */
 public final class EquityTrade implements TradeType {
 
     private final TradeRef tradeRef;

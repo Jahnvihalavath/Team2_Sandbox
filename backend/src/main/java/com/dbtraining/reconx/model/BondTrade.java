@@ -7,15 +7,14 @@ import java.util.Objects;
 
 /**
  * ============================================================================
- * Represnts a bond trade processed by the reconciliation system.
+ * TICKET-ADV021 — BondTrade with Builder pattern
  *
- * <p> A bond trade stores the information reuired to identify,
- * value and reconcile a fixed-income security, including its
- * face value,coupon rate,maturity ddate,currency and trade
- * details.</p>
+ * WHAT:    Fixed-income trade — couponRate, maturityDate, faceValue, isin.
+ * HOW:     Same builder pattern. notional() = faceValue (in the bond's ccy).
+ * WHY:     Bonds need couponRate/maturity for downstream cashflow modelling.
+ *          Modelling them on the trade is the simplest path for the demo.
  * ============================================================================
  */
- 
 public final class BondTrade implements TradeType {
 
     private final TradeRef tradeRef;
@@ -28,18 +27,6 @@ public final class BondTrade implements TradeType {
     private final LocalDate tradeDate;
     private final long counterpartyId;
 
-    /** 
-    *Creates a new bond trade.
-    *
-    *@param tradeRef unique trade identifier
-    *@param isin international securities identifier
-    *@param faceValue bond face value
-    *@param couponRate annual coupon rate
-    *@param maturityDate maturity date of the bond
-    *@param currency settlement currency
-    *@param side buy or sell side
-    *@param tradeDate execution date
-    */
     private BondTrade(Builder b) {
         this.tradeRef       = b.tradeRef;
         this.isin           = b.isin;
