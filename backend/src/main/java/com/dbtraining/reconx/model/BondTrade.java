@@ -56,12 +56,14 @@ public final class BondTrade implements TradeType {
         if (!(o instanceof BondTrade other)) {
             return false;
         }
+        
         return tradeRef.equals(other.tradeRef);
     }
+
     @Override public int hashCode() {
-        // TODO(TICKET-ADV028): hash from tradeRef so it pairs with equals().
         return tradeRef.hashCode();
     }
+
     @Override
     public String toString() {
         return "BondTrade[ref=%s, symbol=%s, qty=%s, price=%s %s, side=%s]"
