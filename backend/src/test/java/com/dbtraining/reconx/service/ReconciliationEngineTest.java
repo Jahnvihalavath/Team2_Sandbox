@@ -55,10 +55,30 @@ void testReconcile_exactMatch_returnsMatched() {
 
     @Test
     void testReconcile_missingCounterpartyTrade_returnsBreak() {
-        // TODO(TICKET-ADV042): internal trade with no external counterpart -> status BREAK,
-        //                     discrepancyType = "MISSING_EXTERNAL".
-        org.junit.jupiter.api.Assertions.fail("TICKET-ADV042 not implemented yet");
-    }
+    // Given
+        EquityTrade internal = equity(
+            "EQU-20260603-0003",
+            "100.00",
+            "1000"
+    );
+
+    // When
+    List<ReconResult> out =
+            engine.reconcile(
+                    List.of(internal),
+                    List.of(),
+                    ReconciliationRule.EXACT
+            );
+
+    // Then
+    assertThat(out).hasSize(1);
+
+    assertThat(out.get(0).status())
+            .isEqualTo(ReconResult.Status.BREAK);
+
+    assertThat(out.get(0).discrepancyType())
+            .isEqualTo("MISSING_EXTERNAL");
+}
 
     @Test
     void testReconcile_emptyInternal_returnsEmpty() {

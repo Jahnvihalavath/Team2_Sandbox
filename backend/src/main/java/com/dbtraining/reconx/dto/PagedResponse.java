@@ -1,7 +1,7 @@
 package com.dbtraining.reconx.dto;
 
 import org.springframework.data.domain.Page;
-
+import java.util.function.Function;
 import java.util.List;
 
 /**
@@ -15,13 +15,18 @@ public record PagedResponse<T>(
         long totalElements,
         int totalPages
 ) {
-    public static <S, T> PagedResponse<T> from(Page<S> src, java.util.function.Function<S, T> mapper) {
+public static <E, T> PagedResponse<T> of(Page<E> page, Function<E, T> mapper) 
+    {
         return new PagedResponse<>(
-                src.getContent().stream().map(mapper).toList(),
-                src.getNumber(),
-                src.getSize(),
-                src.getTotalElements(),
-                src.getTotalPages()
+        page.getContent()
+                .stream()
+                .map(mapper)
+                .toList(),
+        page.getNumber(),
+        page.getSize(),
+        page.getTotalElements(),
+        page.getTotalPages()
+
         );
     }
 }

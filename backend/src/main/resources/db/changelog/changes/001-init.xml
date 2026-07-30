@@ -20,6 +20,15 @@
         </preConditions>
 
         <createTable tableName="init_log">
+        <column name="id" type="BIGINT" autoIncrement="true">
+            <constraints primaryKey="true"/>
+        </column>
+
+        <column name="trade_ref" type="VARCHAR(30)">
+            <constraints nullable="false" unique="true"/>
+        </column>
+
+        <column name="created_at" type="TIMESTAMP"/>
         </createTable>
 
         <rollback>

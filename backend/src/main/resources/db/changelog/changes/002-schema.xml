@@ -56,7 +56,7 @@
             <column name="currency" type="VARCHAR(3)"><constraints nullable="false"/></column>
             <column name="isin" type="VARCHAR(12)"><constraints unique="true"/></column>
         </createTable>
-        <rollback
+        <rollback>
             <dropTable tableName="instruments"/>
         </rollback>
     </changeSet>
