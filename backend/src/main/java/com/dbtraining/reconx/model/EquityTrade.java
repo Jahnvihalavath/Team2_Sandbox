@@ -35,9 +35,9 @@ public final class EquityTrade implements TradeType {
 
     /** Notional = quantity * price in the trade currency. */
     @Override public Money notional() {
-        // TODO(TICKET-ADV019): return new Money(quantity * price, currency).
+        
         return new Money(quantity.multiply(price), currency);
-        // throw new UnsupportedOperationException("TICKET-ADV019");
+        
 
     }
 
@@ -104,23 +104,23 @@ public final class EquityTrade implements TradeType {
 
         // public EquityTrade build() {
 
-        //     Objects.requireNonNull(tradeRef, "tradeRef is required");
-        //     Objects.requireNonNull(instrumentSymbol, "instrumentSymbol is required");
-        //     Objects.requireNonNull(quantity, "quantity is required");
-        //     Objects.requireNonNull(price, "price is required");
-        //     Objects.requireNonNull(currency, "currency is required");
-        //     Objects.requireNonNull(side, "side is required");
-        //     Objects.requireNonNull(tradeDate, "tradeDate is required");
+        //      Objects.requireNonNull(tradeRef, "tradeRef is required");
+        //      Objects.requireNonNull(instrumentSymbol, "instrumentSymbol is required");
+        //      Objects.requireNonNull(quantity, "quantity is required");
+        //      Objects.requireNonNull(price, "price is required");
+        // //     Objects.requireNonNull(currency, "currency is required");
+        // //     Objects.requireNonNull(side, "side is required");
+        // //     Objects.requireNonNull(tradeDate, "tradeDate is required");
         
-        //     if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
-        //         throw new IllegalStateException("quantity must be greater than zero");
-        //     }
+        // //     if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
+        // //         throw new IllegalStateException("quantity must be greater than zero");
+        // //     }
         
-        //     if (price.compareTo(BigDecimal.ZERO) <= 0) {
-        //         throw new IllegalStateException("price must be greater than zero");
-        //     }
+        // //     if (price.compareTo(BigDecimal.ZERO) <= 0) {
+        // //         throw new IllegalStateException("price must be greater than zero");
+        // //     }
         
-        //     return new EquityTrade(this);
-        // }
+        // //     return new EquityTrade(this);
+        // // }
     }
 }
