@@ -76,6 +76,22 @@ public class TradeAnalyticsService {
                 //     }
                 // )
                 new VwapCollector;
+                Collectors.collectingAndThen(
+                    Collectors.toList(),
+                    list->{
+                        BigDecimal  totalValue=list.stream()
+                            .map(t->t.price().multiply(t.quantity()))
+                            .reduce(BigDecimal.ZERO,BigDecimal::add);
+                        BigDecimal totalQuantity=list.stream()
+                            .map(EquityTrade::quantity)
+                            .reduce(BigDecimal.ZERO,BigDecimal::add);
+                        return totalValue.divide(
+                            totalQuantity,
+                            8,
+                            RoundingMode.HALF_UP
+                        );
+                    }
+                )
             ));
     }
 
