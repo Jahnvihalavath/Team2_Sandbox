@@ -14,6 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 /**
  * ============================================================================
  * TICKET-ADV034 — Trade analytics with Collectors (groupingBy + summarizing)
@@ -52,6 +59,23 @@ public class TradeAnalyticsService {
         return equityTrades.stream()
             .collect(Collectors.groupingBy(
                 EquityTrade::instrumentSymbol,
+                // Collectors.collectingAndThen(
+                //     Collectors.toList(),
+                //     list->{
+                //         BigDecimal  totalValue=list.stream()
+                //             .map(t->t.price().multiply(t.quantity()))
+                //             .reduce(BigDecimal.ZERO,BigDecimal::add);
+                //         BigDecimal totalQuantity=list.stream()
+                //             .map(EquityTrade::quantity)
+                //             .reduce(BigDecimal.ZERO,BigDecimal::add);
+                //         return totalValue.divide(
+                //             totalQuantity,
+                //             8,
+                //             RoundingMode.HALF_UP
+                //         );
+                //     }
+                // )
+                new VwapCollector;
                 Collectors.collectingAndThen(
                     Collectors.toList(),
                     list->{
@@ -106,6 +130,44 @@ public class TradeAnalyticsService {
             case FXTrade trade->trade.counterpartyId();
             case BondTrade trade->trade.counterpartyId();
             case DerivativeTrade trade->trade.counterpartyId();
+        }
+    }
+    private static class VwapCollector implements Collectors<EquityTrade, VwapCollector.Accumulator,BigDecimal>{
+        static class Accumulator{
+            BigDecimal totalValue=BigDecimal.ZERO;
+            BigDecimal totalQty=BigDecimal.ZERO;
+        }
+        @Override
+        public Supplier<Accumulator> supplier(){
+            return Accumulator::new;
+        }
+        @Override
+        public BiConsumer<Accumulator,EquityTrade> accumulator(){
+            return(acc,trade)->{
+                acc.totalValue=acc.totalValue.add(
+                    trade.price(),multiply(trade.quantity())
+                );
+                acc.totalQty=acc.totalQty.add(
+                    trade.quantity()
+                );
+            };
+        }
+        @Override
+        public Function<Accumulator,BigDecimal> finisher(){
+            return acc ->{
+                if(acc.totalQty.compareTo(BigDecimal.ZERO)==0){
+                    return BigDecimal.ZERO;
+                }
+                return acc.totalValue.divide(
+                    acc.totalQty,
+                    4,
+                    RoundingMode.HALF_UP
+                );
+            };
+        }
+        @Override
+        public Set<Characteristics> characteristics(){
+            return Collections.emptySet();
         }
     }
 
