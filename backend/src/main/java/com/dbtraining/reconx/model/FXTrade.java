@@ -5,20 +5,6 @@ import java.time.LocalDate;
 import java.util.Currency;
 import java.util.Objects;
 
-/**
- * ============================================================================
- * TICKET-ADV020 — FXTrade with Builder pattern
- *
- * WHAT:    FX spot/forward trade — two currencies, a notional in ccy1, and
- *          an fxRate.
- * HOW:     Same builder pattern as EquityTrade. notional() converts to ccy2
- *          via fxRate so reconciliation rolls up in the trade's quote ccy.
- * WHY:     FX has two natural sides — a EUR/USD trade is BOTH a buy of EUR
- *          AND a sell of USD. Modelling that with two distinct currency
- *          fields makes settlement-side reasoning explicit.
- * OBSERVE: notional().currency() == ccy2; .amount() == notionalCcy1 * fxRate.
- * ============================================================================
- */
 public final class FXTrade implements TradeType {
 
     private final TradeRef tradeRef;
@@ -49,8 +35,9 @@ public final class FXTrade implements TradeType {
 
     /** Notional in ccy2 = notionalCcy1 * fxRate. */
     @Override public Money notional() {
-        // TODO(TICKET-ADV020): return new Money(notionalCcy1 * fxRate, ccy2).
-        return new Money(notionalCcy1.multiply(fxRate), ccy2);
+        // TODO(TICKET-ADV020): 
+        return new Money(notionalCcy1 * fxRate, ccy2).
+        //return new Money(notionalCcy1.multiply(fxRate), ccy2);
         // throw new UnsupportedOperationException("TICKET-ADV020");
     }
 

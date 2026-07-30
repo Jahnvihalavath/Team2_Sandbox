@@ -5,15 +5,6 @@ import java.time.LocalDate;
 import java.util.Currency;
 import java.util.Objects;
 
-/**
- * ============================================================================
- * TICKET-ADV022 — DerivativeTrade with Builder pattern
- *
- * WHAT:    Option/derivative trade — underlying, strike, expiry, optionType.
- * HOW:     Same builder pattern. notional() = strike * quantity in the
- *          trade's currency (simplified — real derivatives use delta-adjusted).
- * ============================================================================
- */
 public final class DerivativeTrade implements TradeType {
 
     public enum OptionType { CALL, PUT }
@@ -50,8 +41,9 @@ public final class DerivativeTrade implements TradeType {
 
     /** Simplified notional = strike * quantity in the trade currency. */
     @Override public Money notional() {
-        // TODO(TICKET-ADV022): return new Money(strike * quantity, currency).
-        return new Money(strike.multiply(quantity), currency);
+        // TODO(TICKET-ADV022): 
+        return new Money(strike * quantity, currency).
+        //return new Money(strike.multiply(quantity), currency);
     }
 
     public String underlying()       { return underlying; }
@@ -120,31 +112,30 @@ public final class DerivativeTrade implements TradeType {
 
         public DerivativeTrade build() {
 
-    Objects.requireNonNull(tradeRef, "tradeRef");
-    Objects.requireNonNull(underlying, "underlying");
-    Objects.requireNonNull(strike, "strike");
-    Objects.requireNonNull(quantity, "quantity");
-    Objects.requireNonNull(expiry, "expiry");
-    Objects.requireNonNull(optionType, "optionType");
-    Objects.requireNonNull(currency, "currency");
-    Objects.requireNonNull(side, "side");
-    Objects.requireNonNull(tradeDate, "tradeDate");
+            Objects.requireNonNull(tradeRef, "tradeRef");
+            Objects.requireNonNull(underlying, "underlying");
+            Objects.requireNonNull(strike, "strike");
+            Objects.requireNonNull(quantity, "quantity");
+            Objects.requireNonNull(expiry, "expiry");
+            Objects.requireNonNull(optionType, "optionType");
+            Objects.requireNonNull(currency, "currency");
+            Objects.requireNonNull(side, "side");
+            Objects.requireNonNull(tradeDate, "tradeDate");
 
-    if (strike.compareTo(BigDecimal.ZERO) <= 0) {
-        throw new IllegalStateException("strike must be positive");
-    }
+            if (strike.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalStateException("strike must be positive");
+            }
 
-    if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
-        throw new IllegalStateException("quantity must be positive");
-    }
+            if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalStateException("quantity must be positive");
+            }
 
-    if (expiry.isBefore(tradeDate)) {
-        throw new IllegalStateException(
-                "expiry cannot be before tradeDate"
-        );
-    }
+            if (expiry.isBefore(tradeDate)) {
+                throw new IllegalStateException("expiry cannot be before tradeDate"
+                );
+            }
 
-    return new DerivativeTrade(this);
-}
+            return new DerivativeTrade(this);
+        }
     }
 }

@@ -4,17 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Currency;
 import java.util.Objects;
-
-/**
- * ============================================================================
- * Represnts a bond trade processed by the reconciliation system.
- *
- * <p> A bond trade stores the information reuired to identify,
- * value and reconcile a fixed-income security, including its
- * face value,coupon rate,maturity ddate,currency and trade
- * details.</p>
- * ============================================================================
- */
  
 public final class BondTrade implements TradeType {
 
@@ -129,21 +118,20 @@ public final class BondTrade implements TradeType {
             //   - maturityDate must not be before tradeDate (IllegalStateException otherwise).
             //   - return new BondTrade(this).
             Objects.requireNonNull(tradeRef, "tradeRef");
-Objects.requireNonNull(isin, "isin");
-Objects.requireNonNull(faceValue, "faceValue");
-Objects.requireNonNull(couponRate, "couponRate");
-Objects.requireNonNull(maturityDate, "maturityDate");
-Objects.requireNonNull(currency, "currency");
-Objects.requireNonNull(side, "side");
-Objects.requireNonNull(tradeDate, "tradeDate");
+            Objects.requireNonNull(isin, "isin");
+            Objects.requireNonNull(faceValue, "faceValue");
+            Objects.requireNonNull(couponRate, "couponRate");
+            Objects.requireNonNull(maturityDate, "maturityDate");
+            Objects.requireNonNull(currency, "currency");
+            Objects.requireNonNull(side, "side");
+            Objects.requireNonNull(tradeDate, "tradeDate");
 
-if (maturityDate.isBefore(tradeDate)) {
-    throw new IllegalStateException(
-            "maturityDate cannot be before tradeDate"
-    );
-}
+            if (maturityDate.isBefore(tradeDate)) {
+                throw new IllegalStateException("maturityDate cannot be before tradeDate"
+                );
+            }
 
-return new BondTrade(this);
+            return new BondTrade(this);
         }
     }
 }

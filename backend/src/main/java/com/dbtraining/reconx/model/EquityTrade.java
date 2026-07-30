@@ -35,9 +35,10 @@ public final class EquityTrade implements TradeType {
 
     /** Notional = quantity * price in the trade currency. */
     @Override public Money notional() {
-        // TODO(TICKET-ADV019): return new Money(quantity * price, currency).
+        // TODO(TICKET-ADV019): 
+        return new Money(quantity * price, currency).
 
-        return new Money(quantity.multiply(price), currency);
+        //return new Money(quantity.multiply(price), currency);
         // throw new UnsupportedOperationException("TICKET-ADV019");
 
     }
