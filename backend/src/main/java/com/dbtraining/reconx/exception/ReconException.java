@@ -1,3 +1,5 @@
+package com.dbtraining.reconx.exception;
+
 public abstract class ReconException extends RuntimeException {
 
     protected ReconException(String message) {
