@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- ============================================================================
- TICKET-ADV017 — Seed data (counterparties, instruments, sample trades, users)
- WHAT:    Loads CSV files baked into the JAR.
- HOW:     <loadData> reads from classpath — paths are relative to the
-          changeSet file. CSV headers must match column names.
- WHY:     The student copy ships an empty DB; the trainer copy ships seeded
-          data so demos work the moment the app boots.
- OBSERVE: SELECT count(*) FROM counterparties → 10. trades → 500.
-          users → 4 (admin/trader/viewer/recon analyst).
- ============================================================================
--->
+
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
 
-    <changeSet id="008-seed-counterparties" author="trainer">
+
+    <!-- ========================================================= -->
+    <!-- Seed counterparties -->
+    <!-- ========================================================= -->
+
+    <changeSet id="008-seed-counterparties" author="aadi">
 
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
@@ -25,13 +20,20 @@
             </sqlCheck>
         </preConditions>
 
-        <loadData file="data/counterparties.csv" tableName="counterparties"
-                  separator="," relativeToChangelogFile="true">
+
+        <loadData
+                file="data/counterparties.csv"
+                tableName="counterparties"
+                separator=","
+                relativeToChangelogFile="true">
+
             <column name="id" type="NUMERIC"/>
             <column name="name" type="STRING"/>
             <column name="lei_code" type="STRING"/>
             <column name="region" type="STRING"/>
+
         </loadData>
+
 
         <rollback>
             <sql>DELETE FROM counterparties;</sql>
@@ -40,7 +42,12 @@
     </changeSet>
 
 
-    <changeSet id="008-seed-instruments" author="trainer">
+
+    <!-- ========================================================= -->
+    <!-- Seed instruments -->
+    <!-- ========================================================= -->
+
+    <changeSet id="008-seed-instruments" author="aadi">
 
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
@@ -48,63 +55,225 @@
             </sqlCheck>
         </preConditions>
 
-        <loadData file="data/instruments.csv" tableName="instruments"
-                  separator="," relativeToChangelogFile="true">
+
+        <!-- Existing 15 instruments -->
+        <loadData
+                file="data/instruments.csv"
+                tableName="instruments"
+                separator=","
+                relativeToChangelogFile="true">
+
             <column name="id" type="NUMERIC"/>
             <column name="symbol" type="STRING"/>
             <column name="name" type="STRING"/>
             <column name="asset_class" type="STRING"/>
             <column name="currency" type="STRING"/>
             <column name="isin" type="STRING"/>
+
         </loadData>
 
+
+        <!-- Generate instruments 16-50 -->
+        <sql>
+
+            INSERT INTO instruments
+            (
+                id,
+                symbol,
+                name,
+                asset_class,
+                currency,
+                isin
+            )
+
+            SELECT
+
+                X,
+
+                'GEN' || RIGHT('0000' || CAST(X AS VARCHAR),4),
+
+                'Generated Instrument ' || X,
+
+
+                CASE MOD(X,5)
+                    WHEN 0 THEN 'EQUITY'
+                    WHEN 1 THEN 'FIXED_INCOME'
+                    WHEN 2 THEN 'FX'
+                    WHEN 3 THEN 'COMMODITY'
+                    ELSE 'DERIVATIVE'
+                END,
+
+
+                CASE MOD(X,5)
+                    WHEN 0 THEN 'USD'
+                    WHEN 1 THEN 'EUR'
+                    WHEN 2 THEN 'GBP'
+                    WHEN 3 THEN 'JPY'
+                    ELSE 'CHF'
+                END,
+
+
+                NULL
+
+
+            FROM SYSTEM_RANGE(16,50);
+
+
+        </sql>
+
+
         <rollback>
-            <sql>DELETE FROM instruments;</sql>
+            <sql>
+                DELETE FROM instruments WHERE id BETWEEN 16 AND 50;
+            </sql>
         </rollback>
 
     </changeSet>
 
 
-    <changeSet id="008-seed-users" author="trainer">
+
+    <!-- ========================================================= -->
+    <!-- Seed trades -->
+    <!-- ========================================================= -->
+
+    <changeSet id="008-seed-trades" author="aadi">
 
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM users;
+                SELECT COUNT(*) FROM trades;
             </sqlCheck>
         </preConditions>
 
-        <!-- Real BCrypt hashes (cost=10) for admin123 / trader123 / viewer123 / recon123.
-             Generated via: htpasswd -bnBC 10 "" <pw> | tr -d ':\n'
-             Spring Security's BCryptPasswordEncoder accepts both $2a$ and $2y$ prefixes. -->
 
-        <insert tableName="users">
-            <column name="email" value="admin@db.com"/>
-            <column name="password_hash" value="$2y$10$L9iP3BfsBS2LbVJRfc86TuWnJvP.AohjX3PNLwdtjlZfyB7YSp87C"/>
-            <column name="role" value="ADMIN"/>
-        </insert>
+        <sql>
 
-        <insert tableName="users">
-            <column name="email" value="trader@db.com"/>
-            <column name="password_hash" value="$2y$10$LIpkayi0QDWyVguPtEQbkOATM7PTnMKFDNq47K92TUx2LHTBFQf1i"/>
-            <column name="role" value="TRADER"/>
-        </insert>
+            INSERT INTO trades
+            (
+                trade_ref,
+                instrument_id,
+                counterparty_id,
+                asset_class,
+                side,
+                quantity,
+                price,
+                trade_date,
+                status
+            )
 
-        <insert tableName="users">
-            <column name="email" value="viewer@db.com"/>
-            <column name="password_hash" value="$2y$10$gC8J5Tzr15p4V6BgbbEFGOEb4VWM4YUOAdKEeyFlXtEvYolYblCVC"/>
-            <column name="role" value="VIEWER"/>
-        </insert>
+            SELECT
 
-        <insert tableName="users">
-            <column name="email" value="recon@db.com"/>
-            <column name="password_hash" value="$2y$10$UVYhlvPX38zSdPhY6bz4ee453bh6gXp9guhAfV5IU2SjcWPm0eWKq"/>
-            <column name="role" value="RECON_ANALYST"/>
-        </insert>
+                'TRD-2026-' || RIGHT('000000' || CAST(X AS VARCHAR),6),
+
+                1 + MOD(X,50),
+
+                1 + MOD(X,10),
+
+                'EQUITY',
+
+
+                CASE
+                    WHEN MOD(X,2)=0 THEN 'BUY'
+                    ELSE 'SELL'
+                END,
+
+
+                ROUND(RAND()*10000+1,4),
+
+                ROUND(RAND()*500+1,4),
+
+
+                DATEADD(
+                    DAY,
+                    MOD(X,120),
+                    DATE '2026-04-01'
+                ),
+
+
+                CASE MOD(X,4)
+                    WHEN 0 THEN 'PENDING'
+                    WHEN 1 THEN 'MATCHED'
+                    WHEN 2 THEN 'UNMATCHED'
+                    ELSE 'DISPUTED'
+                END
+
+
+            FROM SYSTEM_RANGE(1,500);
+
+        </sql>
+
 
         <rollback>
-            <sql>DELETE FROM users;</sql>
+            <sql>
+                DELETE FROM trades;
+            </sql>
         </rollback>
 
     </changeSet>
+
+
+
+    <!-- ========================================================= -->
+    <!-- Seed recon breaks -->
+    <!-- ========================================================= -->
+
+    <changeSet id="008-seed-recon-breaks" author="aadi">
+
+
+        <preConditions onFail="MARK_RAN">
+
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM recon_breaks;
+            </sqlCheck>
+
+        </preConditions>
+
+
+        <sql>
+
+            INSERT INTO recon_breaks
+            (
+                trade_id,
+                discrepancy_type,
+                status
+            )
+
+            SELECT
+
+                id,
+
+
+                CASE MOD(id,3)
+                    WHEN 0 THEN 'PRICE_MISMATCH'
+                    WHEN 1 THEN 'QUANTITY_MISMATCH'
+                    ELSE 'DATE_MISMATCH'
+                END,
+
+
+                'OPEN'
+
+
+            FROM trades
+
+            WHERE status IN ('UNMATCHED','DISPUTED')
+
+            LIMIT 30;
+
+
+        </sql>
+
+
+        <rollback>
+            <sql>
+                DELETE FROM recon_breaks;
+            </sql>
+        </rollback>
+
+
+    </changeSet>
+
+
+
+    <!-- Existing users seed stays here -->
+
 
 </databaseChangeLog>
