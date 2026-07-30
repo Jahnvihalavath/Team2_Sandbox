@@ -1,6 +1,12 @@
 package com.dbtraining.reconx.repository.entity;
 
+import com.dbtraining.reconx.model.TradeType.AssetClass;
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Type;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * TICKET-ADV051 — JPA entity Instrument. JSONB metadata column wired via
@@ -21,21 +27,23 @@ public class Instrument {
     @Column(nullable = false, length = 200)
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "asset_class", nullable = false, length = 20)
-    private String assetClass;
+    private AssetClass assetClass;
 
     @Column(nullable = false, length = 3)
     private String currency;
 
-    @Column(length = 12)
-    private String isin;
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
+    private Map<String, Object> metadata = new HashMap<>();
 
     public Instrument() {}
 
     public Long getId()         { return id; }
     public String getSymbol()   { return symbol; }
     public String getName()     { return name; }
-    public String getAssetClass(){ return assetClass; }
+    public AssetClass getAssetClass(){ return assetClass; }
     public String getCurrency() { return currency; }
-    public String getIsin()     { return isin; }
+    public Map<String, Object> getMetadata() { return metadata; }
 }
