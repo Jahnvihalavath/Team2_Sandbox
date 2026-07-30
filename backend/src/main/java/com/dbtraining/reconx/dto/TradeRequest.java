@@ -38,15 +38,24 @@ public record TradeRequest(
                 message = "side must be BUY or SELL"
         )
         String side,
-
-        @NotNull(message = "quantity is required")
-        @Positive(message = "quantity must be positive")
-        BigDecimal quantity,
+         
+         @NotNull(message = "quantity is required")
+         @DecimalMin(
+        value = "0.0",
+        inclusive = false,
+        message = "quantity must be positive"
+        )      
+         BigDecimal quantity,
 
         @NotNull(message = "price is required")
-        @PositiveOrZero(message = "price must be zero or positive")
-        BigDecimal price,
+         @DecimalMin(
+        value = "0.0",
+        inclusive = false,
+        message = "price must be positive"
+        )
+         BigDecimal price,
 
         @NotNull(message = "tradeDate is required")
+         @PastOrPresent(message = "tradeDate cannot be in the future")
         LocalDate tradeDate
 ) {}
