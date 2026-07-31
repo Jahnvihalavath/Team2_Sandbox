@@ -76,15 +76,13 @@ public PasswordEncoder passwordEncoder() {
         return http
                 .csrf(csrf -> csrf.disable())
                 .headers(h -> h.frameOptions(f -> f.disable())) // allow /h2 in dev
-                .authorizeHttpRequests(auth -> auth     // TIcket 69 required this
-                .requestMatchers("/v1/recon/**")
-                .hasAnyRole("VIEWER", "RECON_ANALYST", "ADMIN")
-                .anyRequest()
+                .authorizeHttpRequests(auth -> auth    
+                 .anyRequest()
                  .permitAll()
              )
                 .build();
     }
-     // whoever works on this file look at line 79 ,this configuration was asked in ticket 69 
+     
     // TODO(TICKET-ADV073): @Bean PasswordEncoder (BCrypt).
     // TODO(TICKET-ADV073): register JwtAuthenticationFilter before
     //                     UsernamePasswordAuthenticationFilter.

@@ -47,7 +47,8 @@ public class ReconController {
         // TODO(TICKET-ADV069): once recon_jobs + recon_breaks tables are wired,
         //   return breaks.findByJobId(jobId). Day-0 returns an empty list so
         //   the React breaks-table renders "no breaks" gracefully.
-        return breaks.findAll();
+        return Collections.emptyList();
+    
     }
 
     @PutMapping("/results/{id}/resolve")
