@@ -8,14 +8,24 @@ export function AuthProvider({ children }) {
   // TODO(TICKET-ADV112): lazy-init `user` from sessionStorage so a page
   //                     refresh doesn't blow the JWT away. Look for keys
   //                     'reconx-token' and 'reconx-role'.
-  const [user /*, setUser */] = useState(null);
+  const [user, setUser] = useState(() => {
+    const token = sessionStorage.getItem('reconx-token');
+    const role = sessionStorage.getItem('reconx-role');
+    return token ? { token, role } : null;
+  });
 
-  const login = (/* token, role */) => {
+  const login = (token, role) => {
     // TODO(TICKET-ADV112): persist token+role to sessionStorage and call setUser.
+    sessionStorage.setItem('reconx-token', token);
+    sessionStorage.setItem('reconx-role', role);
+    setUser({ token, role });
   };
 
   const logout = () => {
     // TODO(TICKET-ADV112): clear sessionStorage and reset user state to null.
+    sessionStorage.removeItem('reconx-token');
+    sessionStorage.removeItem('reconx-role');
+    setUser(null);
   };
 
   return (
