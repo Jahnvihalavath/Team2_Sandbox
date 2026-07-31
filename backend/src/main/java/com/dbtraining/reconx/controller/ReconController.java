@@ -48,6 +48,7 @@ public class ReconController {
         //   return breaks.findByJobId(jobId). Day-0 returns an empty list so
         //   the React breaks-table renders "no breaks" gracefully.
         return Collections.emptyList();
+    
     }
 
     @PutMapping("/results/{id}/resolve")

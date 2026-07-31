@@ -1,5 +1,5 @@
 package com.dbtraining.reconx.security;
-
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -76,10 +76,13 @@ public PasswordEncoder passwordEncoder() {
         return http
                 .csrf(csrf -> csrf.disable())
                 .headers(h -> h.frameOptions(f -> f.disable())) // allow /h2 in dev
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .authorizeHttpRequests(auth -> auth    
+                 .anyRequest()
+                 .permitAll()
+             )
                 .build();
     }
-
+     
     // TODO(TICKET-ADV073): @Bean PasswordEncoder (BCrypt).
     // TODO(TICKET-ADV073): register JwtAuthenticationFilter before
     //                     UsernamePasswordAuthenticationFilter.
