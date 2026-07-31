@@ -13,6 +13,7 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Collector;
 
 import java.util.Collections;
 import java.util.Set;
@@ -38,15 +39,15 @@ public class TradeAnalyticsService {
             .collect(Collectors.groupingBy(
             this::counterpartyIdOf,
             Collectors.collectingAndThen(
-                Collectors.toList(), 
-                list->new NationalSummary(
+                Collectors.toList(),
+                list->new NotionalSummary(
                     list.size(),
                     list.stream()
-                        .map(t->t.national().amount())
-                        .reduce(BigDecimal.ZERO,BigDecimal::add);
+                        .map(t->t.notional().amount())
+                        .reduce(BigDecimal.ZERO,BigDecimal::add)
                     )
                 )
-        
+
         ));
 
     }
@@ -75,7 +76,6 @@ public class TradeAnalyticsService {
                 //         );
                 //     }
                 // )
-                new VwapCollector;
                 Collectors.collectingAndThen(
                     Collectors.toList(),
                     list->{
@@ -130,9 +130,9 @@ public class TradeAnalyticsService {
             case FXTrade trade->trade.counterpartyId();
             case BondTrade trade->trade.counterpartyId();
             case DerivativeTrade trade->trade.counterpartyId();
-        }
+        };
     }
-    private static class VwapCollector implements Collectors<EquityTrade, VwapCollector.Accumulator,BigDecimal>{
+    private static class VwapCollector implements Collector<EquityTrade, VwapCollector.Accumulator,BigDecimal>{
         static class Accumulator{
             BigDecimal totalValue=BigDecimal.ZERO;
             BigDecimal totalQty=BigDecimal.ZERO;
@@ -145,11 +145,19 @@ public class TradeAnalyticsService {
         public BiConsumer<Accumulator,EquityTrade> accumulator(){
             return(acc,trade)->{
                 acc.totalValue=acc.totalValue.add(
-                    trade.price(),multiply(trade.quantity())
+                    trade.price().multiply(trade.quantity())
                 );
                 acc.totalQty=acc.totalQty.add(
                     trade.quantity()
                 );
+            };
+        }
+        @Override
+        public BinaryOperator<Accumulator> combiner(){
+            return (a,b)->{
+                a.totalValue=a.totalValue.add(b.totalValue);
+                a.totalQty=a.totalQty.add(b.totalQty);
+                return a;
             };
         }
         @Override

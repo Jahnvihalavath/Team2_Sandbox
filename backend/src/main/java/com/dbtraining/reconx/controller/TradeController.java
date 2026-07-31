@@ -58,7 +58,8 @@ public class TradeController {
         //   and wrap the resulting Page<Trade> via PagedResponse.from(page, mapper::toResponse).
         //   For Day 1 return an empty PagedResponse so the React grid renders
         //   "no trades match" while the JPA + Specifications work is still pending.
-        return new PagedResponse<>(List.of(), 0, 20, 0, 0);
+        Page<Trade> page = service.list(from, to, status, counterpartyId, pageable);
+        return PagedResponse.of(page, mapper::toResponse);
     }
 
     @PostMapping
@@ -68,7 +69,11 @@ public class TradeController {
         // TODO(TICKET-ADV064): call service.create(req, actor), build a Location
         //   header at /api/v1/trades/{id}, and return 201 Created with the
         //   mapped TradeResponse body.
-        throw new UnsupportedOperationException("TICKET-ADV064");
+        String actor = String.valueOf(principal);
+        Trade saved = service.create(req, actor);
+        return ResponseEntity
+                .created(URI.create("/api/v1/trades/" + saved.getId()))
+                .body(mapper.toResponse(saved));
     }
 
     @PutMapping("/{id}")
@@ -77,7 +82,8 @@ public class TradeController {
                                 @AuthenticationPrincipal Object principal) {
         // TODO(TICKET-ADV065): delegate to service.update(id, req, actor) and
         //   map the updated entity through mapper.toResponse.
-        throw new UnsupportedOperationException("TICKET-ADV065");
+        String actor = String.valueOf(principal);
+        return mapper.toResponse(service.update(id, req, actor));
     }
 
     @PatchMapping("/{id}/status")
