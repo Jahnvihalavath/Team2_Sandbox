@@ -1,5 +1,4 @@
-// TICKET-ADV114 — Compound DataTable.
-// TICKET-ADV117 — useDebouncedSearch.
+// Compound DataTable + useDebouncedSearch driving a paginated trades list.
 import React, { useEffect, useState } from 'react';
 import { withAuth } from '@components/withAuth.jsx';
 import DataTable from '@components/DataTable.jsx';
@@ -12,16 +11,28 @@ function Trades() {
   const [page, setPage] = useState(0);
   const [data, setData] = useState({ items: [], totalPages: 0 });
 
-  // TODO(TICKET-ADV114 + ADV117): useEffect that:
-  //   - builds a query string from `page` and `debounced` (status filter)
-  //   - calls api.listTrades(params) and stores the response in `data`
-  //   - re-runs whenever `page` or `debounced` changes
-  //   - degrades gracefully on error (set empty page).
   useEffect(() => {
-    const params = `?page=${page}${debounced ? `&status=${debounced}` : ''}`;
-    api.listTrades(params)
-      .then((res) => setData(res))
-      .catch(() => setData({ items: [], totalPages: 0 }));
+    let cancelled = false;
+    const params = new URLSearchParams();
+    params.set('page', String(page));
+    if (debounced) params.set('status', debounced);
+
+    api.listTrades(params.toString())
+      .then((res) => {
+        if (cancelled) return;
+        if (res && Array.isArray(res.items)) {
+          setData({ items: res.items, totalPages: res.totalPages ?? 0 });
+        } else if (Array.isArray(res)) {
+          setData({ items: res, totalPages: 1 });
+        } else {
+          setData({ items: [], totalPages: 0 });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setData({ items: [], totalPages: 0 });
+      });
+
+    return () => { cancelled = true; };
   }, [page, debounced]);
 
   return (
@@ -41,17 +52,15 @@ function Trades() {
           { key: 'price',    label: 'Price' },
           { key: 'status',   label: 'Status' },
         ]} />
-        {/* TODO(TICKET-ADV114): render a DataTable.Body with `rows={data.items}`
-            and a `render` prop that returns one <span> per column. */}
         <DataTable.Body
           rows={data.items}
-          render={(row) => (
+          render={(t) => (
             <>
-              <span>{row.tradeRef}</span>
-              <span>{row.instrumentSymbol}</span>
-              <span>{row.quantity}</span>
-              <span>{row.price}</span>
-              <span>{row.status}</span>
+              <span>{t.tradeRef}</span>
+              <span>{t.symbol ?? t.instrument}</span>
+              <span>{t.qty ?? t.quantity}</span>
+              <span>{t.price}</span>
+              <span>{t.status}</span>
             </>
           )}
         />
