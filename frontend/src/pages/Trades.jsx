@@ -1,6 +1,6 @@
 // TICKET-ADV114 — Compound DataTable.
 // TICKET-ADV117 — useDebouncedSearch.
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { withAuth } from '@components/withAuth.jsx';
 import DataTable from '@components/DataTable.jsx';
 import { useDebouncedSearch } from '@hooks/useDebouncedSearch.js';
@@ -17,6 +17,12 @@ function Trades() {
   //   - calls api.listTrades(params) and stores the response in `data`
   //   - re-runs whenever `page` or `debounced` changes
   //   - degrades gracefully on error (set empty page).
+  useEffect(() => {
+    const params = `?page=${page}${debounced ? `&status=${debounced}` : ''}`;
+    api.listTrades(params)
+      .then((res) => setData(res))
+      .catch(() => setData({ items: [], totalPages: 0 }));
+  }, [page, debounced]);
 
   return (
     <section>
@@ -37,6 +43,18 @@ function Trades() {
         ]} />
         {/* TODO(TICKET-ADV114): render a DataTable.Body with `rows={data.items}`
             and a `render` prop that returns one <span> per column. */}
+        <DataTable.Body
+          rows={data.items}
+          render={(row) => (
+            <>
+              <span>{row.tradeRef}</span>
+              <span>{row.instrumentSymbol}</span>
+              <span>{row.quantity}</span>
+              <span>{row.price}</span>
+              <span>{row.status}</span>
+            </>
+          )}
+        />
         <DataTable.Pagination
           page={page}
           totalPages={Math.max(1, data.totalPages)}
