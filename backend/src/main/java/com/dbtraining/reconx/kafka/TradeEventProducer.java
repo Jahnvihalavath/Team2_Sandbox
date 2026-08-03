@@ -10,27 +10,20 @@ import org.springframework.stereotype.Component;
  * ============================================================================
  * TICKET-ADV129 — TradeEventProducer
  *
- * WHAT:    Publishes TradeEvent messages to the `trade-events` Kafka topic.
- * HOW:     KafkaTemplate<String, TradeEvent>. Key = tradeRef so that all
- *          events for the same trade hash to the same partition and
- *          preserve ordering.
- * WHY:     Out-of-order events for the same trade would make event sourcing
- *          impossible (you'd "apply" CREATE after UPDATE).
+ * WHAT: Publishes TradeEvent messages to the `trade-events` Kafka topic.
+ * HOW: KafkaTemplate<String, TradeEvent>. Key = tradeRef so that all
+ * events for the same trade hash to the same partition and
+ * preserve ordering.
+ * WHY: Out-of-order events for the same trade would make event sourcing
+ * impossible (you'd "apply" CREATE after UPDATE).
  * OBSERVE: Kafdrop -> `trade-events` shows one message per published event,
- *          partitioned by tradeRef.
- * ============================================================================
+ * partitioned by tradeRef.
  *
- *  TODO(TICKET-ADV129):
- *    public void publish(TradeEvent event) {
- *        log.debug("Publishing TradeEvent eventId={} ref={} type={}",
- *                  event.eventId(), event.tradeRef(), event.eventType());
- *        template.send(TOPIC, event.tradeRef(), event);
- *    }
- *
- *  GOTCHA: NEVER let a Kafka publish failure roll back the DB transaction.
- *          Publish AFTER commit (use TransactionSynchronizationManager or
- *          @TransactionalEventListener), or accept eventual consistency.
- * ============================================================================
+ * GOTCHA: NEVER let a Kafka publish failure roll back the DB transaction.
+ * Publish AFTER commit (use TransactionSynchronizationManager or
+ * 
+ * @TransactionalEventListener), or accept eventual consistency.
+ *                               ============================================================================
  */
 @Component
 public class TradeEventProducer {
@@ -45,6 +38,19 @@ public class TradeEventProducer {
     }
 
     public void publish(TradeEvent event) {
-        throw new UnsupportedOperationException("TICKET-ADV129");
+        log.debug("Publishing TradeEvent eventId={} ref={} type={}",
+                event.eventId(), event.tradeRef(), event.eventType());
+        template.send(TOPIC, event.tradeRef(), event)
+                .whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        log.error("Failed to publish TradeEvent eventId={} ref={}: {}",
+                                event.eventId(), event.tradeRef(), ex.getMessage(), ex);
+                    } else if (log.isDebugEnabled()) {
+                        log.debug("Published TradeEvent eventId={} to partition={} offset={}",
+                                event.eventId(),
+                                result.getRecordMetadata().partition(),
+                                result.getRecordMetadata().offset());
+                    }
+                });
     }
 }
