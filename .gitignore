@@ -3,4 +3,6 @@ target/
 backend/target/
 .settings/
 .classpath
-.project 
+.project
+node_modules/
+frontend/node_modules/ 
