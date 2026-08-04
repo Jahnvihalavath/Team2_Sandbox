@@ -5,5 +5,7 @@ public enum TradeStatus {
     PENDING,
     MATCHED,
     BREAK,
+    UNMATCHED,
+    DISPUTED,
     CANCELLED
 }

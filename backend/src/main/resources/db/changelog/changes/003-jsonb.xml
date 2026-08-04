@@ -34,7 +34,7 @@
         <preConditions onFail="MARK_RAN">
             <dbms type="h2"/>
         </preConditions>
-        <sql>ALTER TABLE instruments ADD COLUMN metadata JSON DEFAULT '{}' NOT NULL;</sql>
+        <sql>ALTER TABLE instruments ADD COLUMN metadata JSON DEFAULT JSON '{}' NOT NULL;</sql>
         <rollback>
             <sql>ALTER TABLE instruments DROP COLUMN metadata;</sql>
         </rollback>

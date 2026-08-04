@@ -11,10 +11,12 @@ public final class TradeFactory {
     public static TradeType create(String assetClass, Map<String, Object> p) {
         TradeType.AssetClass ac = TradeType.AssetClass.valueOf(assetClass.toUpperCase());
         return switch (ac) {
-            case EQUITY     -> equity(p);
-            case FX         -> fx(p);
-            case BOND       -> bond(p);
-            case DERIVATIVE -> derivative(p);
+            case EQUITY       -> equity(p);
+            case FX           -> fx(p);
+            case BOND         -> bond(p);
+            case FIXED_INCOME -> bond(p);
+            case COMMODITY    -> throw new UnsupportedOperationException("COMMODITY trades are not yet supported");
+            case DERIVATIVE   -> derivative(p);
         };
     }
 
