@@ -1,6 +1,8 @@
 package com.dbtraining.reconx.service;
 
+import com.dbtraining.reconx.dto.TradeMapper;
 import com.dbtraining.reconx.dto.TradeRequest;
+import com.dbtraining.reconx.dto.TradeResponse;
 import com.dbtraining.reconx.exception.DuplicateTradeRefException;
 import com.dbtraining.reconx.exception.TradeNotFoundException;
 import com.dbtraining.reconx.kafka.TradeEventProducer;
@@ -45,17 +47,20 @@ public class TradeService {
     private final InstrumentRepository instRepo;
     private final TradeEventProducer events;
     private final TradeMetrics metrics;
+    private final TradeMapper mapper;
 
     public TradeService(TradeRepository tradeRepo,
                         CounterpartyRepository cpRepo,
                         InstrumentRepository instRepo,
                         TradeEventProducer events,
-                        TradeMetrics metrics) {
+                        TradeMetrics metrics,
+                        TradeMapper mapper) {
         this.tradeRepo = tradeRepo;
         this.cpRepo = cpRepo;
         this.instRepo = instRepo;
         this.events = events;
         this.metrics = metrics;
+        this.mapper = mapper;
     }
 
     public Trade create(TradeRequest req, String actor) {
@@ -129,7 +134,7 @@ public class TradeService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Trade> list(LocalDate from, LocalDate to, String status, Long counterpartyId, Pageable pageable) {
+    public Page<TradeResponse> list(LocalDate from, LocalDate to, String status, Long counterpartyId, Pageable pageable) {
         // TODO(TICKET-ADV055 + TICKET-ADV056): combine the static helpers from
         //   TradeSpecifications (hasStatus, tradeDateBetween, hasCounterparty)
         //   via Specification.where(...).and(...) and call
@@ -139,6 +144,6 @@ public class TradeService {
                 .and(hasStatus(status == null ? null : TradeStatus.valueOf(status)))
                 .and(forCounterparty(counterpartyId));
 
-        return tradeRepo.findAll(spec, pageable);
+        return tradeRepo.findAll(spec, pageable).map(mapper::toResponse);
     }
 }

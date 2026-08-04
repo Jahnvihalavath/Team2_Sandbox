@@ -90,6 +90,8 @@ public sealed interface TradeType
         EQUITY,
         FX,
         BOND,
+        FIXED_INCOME,
+        COMMODITY,
         DERIVATIVE
     }
 }

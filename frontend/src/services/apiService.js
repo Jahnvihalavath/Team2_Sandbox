@@ -36,7 +36,8 @@ export const api = {
     }),
   listTrades: (params = '')  => {
     // TODO(TICKET-ADV114): GET /v1/trades + `params` query string.
-    return request('GET', `/v1/trades${params}`);
+    const query = params && !params.startsWith('?') ? `?${params}` : params;
+    return request('GET', `/v1/trades${query}`);
   },
   createTrade: (req) =>
     request("POST", "/v1/trades", req),

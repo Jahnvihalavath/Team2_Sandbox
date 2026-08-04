@@ -1,9 +1,9 @@
 package com.dbtraining.reconx.repository.entity;
 
 import com.dbtraining.reconx.model.TradeType.AssetClass;
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,8 +34,8 @@ public class Instrument {
     @Column(nullable = false, length = 3)
     private String currency;
 
-    @Type(JsonBinaryType.class)
-    @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column
     private Map<String, Object> metadata = new HashMap<>();
 
     public Instrument() {}
