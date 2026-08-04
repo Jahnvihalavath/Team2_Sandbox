@@ -1,72 +1,40 @@
-// useWebSocket(url) with auto-reconnect (exponential backoff up to `maxRetries`).
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 export function useWebSocket(url, { reconnect = true, maxRetries = 5 } = {}) {
   const [data, setData] = useState(null);
-  const [status, setStatus] = useState("connecting");
+  const [status, setStatus] = useState('connecting');
   const wsRef = useRef(null);
-  const retriesRef = useRef(0);
-  const timerRef = useRef(null);
-  const cancelledRef = useRef(false);
+  const retries = useRef(0);
 
   useEffect(() => {
-    cancelledRef.current = false;
-    retriesRef.current = 0;
-
+    let cancelled = false;
     function connect() {
-      if (cancelledRef.current) return;
       const ws = new WebSocket(url);
       wsRef.current = ws;
-      setStatus("connecting");
-
-      ws.onopen = () => {
-        if (cancelledRef.current) return;
-        setStatus("open");
-        retriesRef.current = 0;
-      };
-      ws.onmessage = (event) => {
-        if (cancelledRef.current) return;
-        try {
-          setData(JSON.parse(event.data));
-        } catch {
-          setData(event.data);
-        }
-      };
-      ws.onerror = () => {
-        if (cancelledRef.current) return;
-        setStatus("error");
-      };
-      ws.onclose = () => {
-        if (cancelledRef.current) return;
-        setStatus("closed");
-        if (reconnect && retriesRef.current < maxRetries) {
-          const attempt = retriesRef.current++;
-          const delay = Math.min(30000, 500 * 2 ** attempt);
-          timerRef.current = setTimeout(connect, delay);
+      ws.onopen    = () => { if (!cancelled) { setStatus('open'); retries.current = 0; } };
+      ws.onmessage = (e) => { if (!cancelled) { try { setData(JSON.parse(e.data)); } catch { setData(e.data); } } };
+      ws.onerror   = () => { if (!cancelled) setStatus('error'); };
+      ws.onclose   = () => {
+        if (cancelled) return;
+        setStatus('closed');
+        if (reconnect && retries.current < maxRetries) {
+          const delay = Math.min(30000, 500 * 2 ** retries.current++);
+          setTimeout(connect, delay);
         }
       };
     }
-
     connect();
-
     return () => {
-      cancelledRef.current = true;
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-      const ws = wsRef.current;
-      if (ws && ws.readyState <= WebSocket.OPEN) {
-        ws.close();
-      }
+      cancelled = true;
+      wsRef.current && wsRef.current.close();
     };
   }, [url, reconnect, maxRetries]);
 
-  const send = useCallback((payload) => {
-    const ws = wsRef.current;
-    if (!ws || ws.readyState !== WebSocket.OPEN) return;
-    ws.send(typeof payload === "string" ? payload : JSON.stringify(payload));
-  }, []);
+  const send = (payload) => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(typeof payload === 'string' ? payload : JSON.stringify(payload));
+    }
+  };
 
   return { data, status, send };
 }
