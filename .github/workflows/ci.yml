@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Backend Build and Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: reconx
+          POSTGRES_USER: reconx_user
+          POSTGRES_PASSWORD: reconx_pass
+        options: >-
+          --health-cmd "pg_isready -U reconx_user -d reconx"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: temurin
+          cache: maven
+
+      # ADV155
+      - name: Liquibase validate
+        working-directory: backend
+        run: ./mvnw -B liquibase:validate
+        env:
+          LIQUIBASE_COMMAND_URL: jdbc:postgresql://localhost:5432/reconx
+          LIQUIBASE_COMMAND_USERNAME: reconx_user
+          LIQUIBASE_COMMAND_PASSWORD: reconx_pass
+
+      - name: Run tests
+        working-directory: backend
+        run: ./mvnw -B verify

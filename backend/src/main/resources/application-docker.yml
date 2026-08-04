@@ -1,0 +1,28 @@
+# =============================================================================
+# Docker profile configuration
+# Liquibase owns schema migrations.
+# Hibernate only validates schema.
+# =============================================================================
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:postgres}:${POSTGRES_PORT:5432}/${POSTGRES_DB:reconx}
+    username: ${POSTGRES_USER:reconx_user}
+    password: ${POSTGRES_PASSWORD:recon_pass}
+    driver-class-name: org.postgresql.Driver
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog-master.xml
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+
+logging:
+  level:
+    com.dbtraining.reconx: INFO
